@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "992766289916",
+    "firebase_url": "https://hamari-chat.firebaseio.com",
+    "project_id": "hamari-chat",
+    "storage_bucket": "hamari-chat.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:992766289916:android:47aee441f8ca3b040cb479",
+        "android_client_info": {
+          "package_name": "co.Paurush.hamari_chat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "992766289916-hd45iio2855l3a7bl2cvcsqfk38rltmm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD7Cv_J7jZMTiQ_ldXCmu1BQE5d9EZ_J6g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "992766289916-hd45iio2855l3a7bl2cvcsqfk38rltmm.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
