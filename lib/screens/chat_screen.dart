@@ -83,7 +83,8 @@ class _ChatScreenState extends State<ChatScreen> {
                     onPressed: () {
                       _firestore.collection('messages').add({
                         'text': message,
-                        'sender': loggedinuser.email
+                        'sender': loggedinuser.email,
+                        'timestamp': FieldValue.serverTimestamp(),
                       });
                       messagecontroller.clear();
                     },
@@ -151,7 +152,7 @@ class Messagestream extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-        stream: _firestore.collection('messages').snapshots(),
+        stream: _firestore.collection('messages').orderBy('timestamp', descending: false).snapshots(),
         builder: (context,AsyncSnapshot<QuerySnapshot>snapshot){
           if (snapshot.hasError) {
             return Text('Something went wrong');
@@ -170,7 +171,7 @@ class Messagestream extends StatelessWidget {
           }
           else
           {
-            final messages = snapshot.data.docs.reversed;
+            final messages = snapshot.data.docs;
             List<MessageBubble>messagewidgets=[];
             for(var message in messages)
             {
