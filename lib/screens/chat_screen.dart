@@ -18,7 +18,7 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     // TODO: implement initState
     getdata();
-    getmessages();
+    //getmessages();
     getrealtimemsg();
     super.initState();
   }
@@ -35,17 +35,17 @@ class _ChatScreenState extends State<ChatScreen> {
       print(e);
     }
   }
-  void getmessages() async {
-    try{
-      final messages = await _firestore.collection("messages").get();
-      for(var msg in messages.docs)
-        {
-          print(msg.data());
-        }
-    }catch(e){
-      print(e);
-    }
-  }
+  // void getmessages() async {
+  //   try{
+  //     final messages = await _firestore.collection("messages").get();
+  //     for(var msg in messages.docs)
+  //       {
+  //         print(msg.data());
+  //       }
+  //   }catch(e){
+  //     print(e);
+  //   }
+  // }
   void getrealtimemsg() async{
     try{
       await for(var snapshot in _firestore.collection("messages").snapshots())
@@ -84,6 +84,34 @@ class _ChatScreenState extends State<ChatScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
+            StreamBuilder(
+                stream: _firestore.collection('messages').snapshots(),
+                builder: (context,AsyncSnapshot<QuerySnapshot>snapshot){
+                  if (snapshot.hasError) {
+                    return Text('Something went wrong');
+                  }
+
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Text("Loading");
+                  }
+                  if(snapshot.hasData)
+                    {
+                      final messages = snapshot.data.docs;
+                      List<Text> messagewidgets=[];
+                      for(var message in messages)
+                        {
+                          final messageText = message.data()['text'];
+                          final messageSender = message.data()['sender'];
+                          final messagewidget = Text('$messageText is sent from $messageSender');
+                          messagewidgets.add(messagewidget);
+                        }
+                      return Column(
+                          children: messagewidgets
+                      );
+
+                    }
+                }
+            ),
             Container(
               decoration: kMessageContainerDecoration,
               child: Row(
