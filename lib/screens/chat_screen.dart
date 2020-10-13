@@ -1,7 +1,11 @@
+import 'dart:ui';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flash_chat/constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+final _firestore  = Firestore.instance;
 
 class ChatScreen extends StatefulWidget {
   static const  String id = "Chat_screen";
@@ -12,7 +16,7 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   String message;
   final _auth = FirebaseAuth.instance;
-  final _firestore  = Firestore.instance;
+
   User loggedinuser;
   @override
   void initState() {
@@ -81,41 +85,15 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
       body: SafeArea(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
           children: <Widget>[
-            StreamBuilder(
-                stream: _firestore.collection('messages').snapshots(),
-                builder: (context,AsyncSnapshot<QuerySnapshot>snapshot){
-                  if (snapshot.hasError) {
-                    return Text('Something went wrong');
-                  }
-
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Text("Loading");
-                  }
-                  if(snapshot.hasData)
-                    {
-                      final messages = snapshot.data.docs;
-                      List<Text> messagewidgets=[];
-                      for(var message in messages)
-                        {
-                          final messageText = message.data()['text'];
-                          final messageSender = message.data()['sender'];
-                          final messagewidget = Text('$messageText is sent from $messageSender');
-                          messagewidgets.add(messagewidget);
-                        }
-                      return Column(
-                          children: messagewidgets
-                      );
-
-                    }
-                }
-            ),
+            Messagestream(),
             Container(
               decoration: kMessageContainerDecoration,
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
+
                 children: <Widget>[
                   Expanded(
                     child: TextField(
@@ -143,6 +121,89 @@ class _ChatScreenState extends State<ChatScreen> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class MessageBubble extends StatelessWidget {
+  MessageBubble({this.Sender,this.TextMsg});
+  final TextMsg;
+  final Sender;
+  @override
+  Widget build(BuildContext context) {
+
+    return Padding(
+      padding: EdgeInsets.all(10.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Text("$Sender" , style: TextStyle(
+            color: Colors.black87,
+            fontSize: 12
+          ),),
+          Material(
+            borderRadius: BorderRadius.circular(30.0),
+            elevation: 10,
+            color: Colors.lightBlueAccent,
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 10,horizontal: 20),
+              child: Text('$TextMsg' ,style: TextStyle(
+                fontSize: 15
+              ),),
+            ),
+
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class Messagestream extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder(
+        stream: _firestore.collection('messages').snapshots(),
+        builder: (context,AsyncSnapshot<QuerySnapshot>snapshot){
+          if (snapshot.hasError) {
+            return Text('Something went wrong');
+          }
+
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Text("Loading");
+          }
+          if(!snapshot.hasData)
+          {
+            return Center(
+              child: CircularProgressIndicator(
+                backgroundColor: Colors.blueAccent,
+              ),
+            );
+          }
+          else
+          {
+            final messages = snapshot.data.docs;
+            List<MessageBubble>messagewidgets=[];
+            for(var message in messages)
+            {
+              final messageText = message.data()['text'];
+              final messageSender = message.data()['sender'];
+              final messageBubbler = MessageBubble(Sender: messageSender,TextMsg: messageText,);
+              messagewidgets.add(messageBubbler);
+            }
+            return Expanded(
+                child: ListView(
+                  padding: EdgeInsets.symmetric(vertical: 20,horizontal: 10),
+                  children: [
+                    Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: messagewidgets
+                    ),],
+                )
+
+            );
+          }
+        }
     );
   }
 }
