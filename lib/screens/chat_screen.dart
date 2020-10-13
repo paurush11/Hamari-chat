@@ -22,10 +22,8 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     getdata();
-    //getmessages();
-    getrealtimemsg();
+
     super.initState();
   }
   void getdata() async {
@@ -36,32 +34,6 @@ class _ChatScreenState extends State<ChatScreen> {
         loggedinuser = user;
         print(loggedinuser.email);
       }
-    }catch(e)
-    {
-      print(e);
-    }
-  }
-  // void getmessages() async {
-  //   try{
-  //     final messages = await _firestore.collection("messages").get();
-  //     for(var msg in messages.docs)
-  //       {
-  //         print(msg.data());
-  //       }
-  //   }catch(e){
-  //     print(e);
-  //   }
-  // }
-  void getrealtimemsg() async{
-    try{
-      await for(var snapshot in _firestore.collection("messages").snapshots())
-        {
-          for(var msg in snapshot.docs)
-          {
-            print(msg.data());
-          }
-
-        }
     }catch(e)
     {
       print(e);
@@ -198,7 +170,7 @@ class Messagestream extends StatelessWidget {
           }
           else
           {
-            final messages = snapshot.data.docs;
+            final messages = snapshot.data.docs.reversed;
             List<MessageBubble>messagewidgets=[];
             for(var message in messages)
             {
@@ -215,6 +187,7 @@ class Messagestream extends StatelessWidget {
             }
             return Expanded(
                 child: ListView(
+                  reverse: true,
                   padding: EdgeInsets.symmetric(vertical: 20,horizontal: 10),
                   children: [
                     Column(
