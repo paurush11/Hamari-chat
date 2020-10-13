@@ -6,6 +6,7 @@ import 'package:flash_chat/constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 final _firestore  = Firestore.instance;
+User loggedinuser;
 
 class ChatScreen extends StatefulWidget {
   static const  String id = "Chat_screen";
@@ -14,10 +15,11 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  final messagecontroller =  TextEditingController();
   String message;
   final _auth = FirebaseAuth.instance;
 
-  User loggedinuser;
+
   @override
   void initState() {
     // TODO: implement initState
@@ -97,8 +99,10 @@ class _ChatScreenState extends State<ChatScreen> {
                 children: <Widget>[
                   Expanded(
                     child: TextField(
+                      controller: messagecontroller,
                       onChanged: (value) {
                         message = value;
+
                       },
                       decoration: kMessageTextFieldDecoration,
                     ),
@@ -109,6 +113,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         'text': message,
                         'sender': loggedinuser.email
                       });
+                      messagecontroller.clear();
                     },
                     child: Text(
                       'Send',
@@ -125,26 +130,37 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 }
 
+
 class MessageBubble extends StatelessWidget {
-  MessageBubble({this.Sender,this.TextMsg});
+  MessageBubble({this.Sender,this.TextMsg,this.isMe});
   final TextMsg;
   final Sender;
+  bool isMe;
+
   @override
   Widget build(BuildContext context) {
 
     return Padding(
       padding: EdgeInsets.all(10.0),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: isMe? CrossAxisAlignment.end:CrossAxisAlignment.start,
         children: [
           Text("$Sender" , style: TextStyle(
             color: Colors.black87,
             fontSize: 12
           ),),
           Material(
-            borderRadius: BorderRadius.circular(30.0),
+            borderRadius: isMe?BorderRadius.only(
+                topLeft: Radius.circular(30),
+                bottomRight: Radius.circular(30),
+                bottomLeft: Radius.circular(30)
+            ):BorderRadius.only(
+                topRight: Radius.circular(30),
+                bottomRight: Radius.circular(30),
+                bottomLeft: Radius.circular(30)
+            ),
             elevation: 10,
-            color: Colors.lightBlueAccent,
+            color: isMe? Colors.blueAccent:Colors.greenAccent,
             child: Padding(
               padding: EdgeInsets.symmetric(vertical: 10,horizontal: 20),
               child: Text('$TextMsg' ,style: TextStyle(
@@ -188,7 +204,13 @@ class Messagestream extends StatelessWidget {
             {
               final messageText = message.data()['text'];
               final messageSender = message.data()['sender'];
-              final messageBubbler = MessageBubble(Sender: messageSender,TextMsg: messageText,);
+              final currentuser = loggedinuser.email;
+              bool val;
+              if(currentuser!=messageSender)
+                  val = false;
+              else
+                  val = true;
+              final messageBubbler = MessageBubble(Sender: messageSender,TextMsg: messageText,isMe: val,);
               messagewidgets.add(messageBubbler);
             }
             return Expanded(
